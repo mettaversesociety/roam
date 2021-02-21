@@ -35,50 +35,50 @@ app.use('/', routes);
 app.use('/users', users);
 
 // socketIO stuff
-io.sockets.on('connection', (socket) => {
-    socket.userData = { x: 0, y: 0, z: 0, header: 0 };
+io.sockets.on('connection', function (socket) {
+    socket.userData = { x: 0, y: 0, z: 0, heading: 0 };//Default values;
 
     console.log(`${socket.id} connected`);
     socket.emit('setId', { id: socket.id });
 
-    socket.on('disconnect', () => {
-        console.log(`Player ${socket.id} disconnected`);
+    socket.on('disconnect', function () {
         socket.broadcast.emit('deletePlayer', { id: socket.id });
     });
 
-    socket.on('init', (data) => {
+    socket.on('init', function (data) {
         console.log(`socket.init ${data.model}`);
         socket.userData.model = data.model;
         socket.userData.colour = data.colour;
         socket.userData.x = data.x;
         socket.userData.y = data.y;
         socket.userData.z = data.z;
-        socket.userData.headering = data.h;
-        socket.userData.pb = data.pb;
-        socket.userData.action = "Idle";
+        socket.userData.heading = data.h;
+        socket.userData.pb = data.pb,
+            socket.userData.action = "Idle";
     });
 
-    socket.on('update', (data) => {
+    socket.on('update', function (data) {
         socket.userData.x = data.x;
         socket.userData.y = data.y;
         socket.userData.z = data.z;
-        socket.userData.headering = data.h;
-        socket.userData.pb = data.pb;
-        socket.userData.action = data.action;
+        socket.userData.heading = data.h;
+        socket.userData.pb = data.pb,
+            socket.userData.action = data.action;
     });
 
-    socket.on('chat message', (data) => {
-        console.log(`chat message: ${data.id} ${data.message}`);
+    socket.on('chat message', function (data) {
+        console.log(`chat message:${data.id} ${data.message}`);
         io.to(data.id).emit('chat message', { id: socket.id, message: data.message });
-    });
+    })
 });
 
 setInterval(function () {
     const nsp = io.of('/');
     let pack = [];
+
     for (let id in io.sockets.sockets) {
         const socket = nsp.connected[id];
-        // Only push sockets that have been initialized
+        //Only push sockets that have been initialised
         if (socket.userData.model !== undefined) {
             pack.push({
                 id: socket.id,
@@ -87,14 +87,14 @@ setInterval(function () {
                 x: socket.userData.x,
                 y: socket.userData.y,
                 z: socket.userData.z,
-                header: socket.userData.heading,
+                heading: socket.userData.heading,
                 pb: socket.userData.pb,
                 action: socket.userData.action
             });
         }
     }
     if (pack.length > 0) io.emit('remoteData', pack);
-}, 40); // 25 times a second -- 40 ms between each interval 
+}, 40); // 25 times a second
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

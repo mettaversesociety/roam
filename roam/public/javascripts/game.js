@@ -28,7 +28,7 @@ class Game {
 
 		this.messages = {
 			text: [
-				"Welcome to Roam"
+				"Welcome to Roam",
 			],
 			index: 0
 		}
@@ -41,7 +41,14 @@ class Game {
 		this.anims = ['Walking', 'Walking Backwards', 'Turn', 'Running'];
 
 		const options = {
-			assets: [],
+			assets: [
+				`${this.assetsPath}images/nx.jpg`,
+				`${this.assetsPath}images/px.jpg`,
+				`${this.assetsPath}images/ny.jpg`,
+				`${this.assetsPath}images/py.jpg`,
+				`${this.assetsPath}images/nz.jpg`,
+				`${this.assetsPath}images/pz.jpg`
+			],
 			oncomplete: function () {
 				game.init();
 			}
@@ -104,14 +111,14 @@ class Game {
 		this.loadEnvironment(loader);
 
 		this.speechBubble = new SpeechBubble(this, "", 150);
-		this.speechBubble.mesh.position.set(0, 350, 0);
+		this.speechBubble.mesh.position.set(0, -350, 0);
 
 		this.joystick = new JoyStick({
 			onMove: this.playerControl,
 			game: this
 		});
 
-		this.renderer = new THREE.WebGLRenderer({ antialias: true }); 
+		this.renderer = new THREE.WebGLRenderer({ antialias: true });
 		this.renderer.setPixelRatio(window.devicePixelRatio);
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.renderer.shadowMap.enabled = true;
@@ -143,6 +150,17 @@ class Game {
 					}
 				}
 			});
+
+			const tloader = new THREE.CubeTextureLoader();
+			tloader.setPath(`${game.assetsPath}/images/`);
+
+			var textureCube = tloader.load([
+				'px.jpg', 'nx.jpg',
+				'py.jpg', 'ny.jpg',
+				'pz.jpg', 'nz.jpg'
+			]);
+
+			game.scene.background = textureCube;
 
 			game.loadNextAnim(loader);
 		})
@@ -428,7 +446,6 @@ class Player {
 			});
 
 			player.object = new THREE.Object3D();
-			//player.object.position.set(3122, 0, -173);
 			player.object.rotation.set(0, 2.6, 0);
 
 			player.object.add(object);
@@ -499,15 +516,13 @@ class PlayerLocal extends Player {
 		super(game, model);
 
 		const player = this;
-		const socket = io.connect();
+		const socket = io.connect('');
 		socket.on('setId', function (data) {
 			player.id = data.id;
 		});
-
 		socket.on('remoteData', function (data) {
 			game.remoteData = data;
 		});
-
 		socket.on('deletePlayer', function (data) {
 			const players = game.remotePlayers.filter(function (player) {
 				if (player.id == data.id) {
@@ -519,17 +534,16 @@ class PlayerLocal extends Player {
 				if (index != -1) {
 					game.remotePlayers.splice(index, 1);
 					game.scene.remove(players[0].object);
-				}
-			} else {
-				let index = game.initialisingPlayers.indexOf(data.id);
-				if (index != -1) {
-					const player = game.initialisingPlayers[index];
-					player.deleted = true;
-					game.initialisingPlayers.splice(index, 1);
+				} else {
+					index = game.initialisingPlayers.indexOf(data.id);
+					if (index != -1) {
+						const player = game.initialisingPlayers[index];
+						player.deleted = true;
+						game.initialisingPlayers.splice(index, 1);
+					}
 				}
 			}
-		});
-
+		})
 		socket.on('chat message', function (data) {
 			document.getElementById('chat').style.bottom = '0px';
 			const player = game.getRemotePlayerById(data.id);
@@ -538,7 +552,6 @@ class PlayerLocal extends Player {
 			game.activeCamera = game.cameras.chat;
 			game.speechBubble.update(data.message);
 		});
-
 		$('#msg-form').submit(function (e) {
 			socket.emit('chat message', { id: game.chatSocketId, message: $('#m').val() });
 			$('#m').val('');
