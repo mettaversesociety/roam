@@ -6,7 +6,6 @@ html
     script(src='/socket.io/socket.io.js')
   body
     block content
-//-
     script.
       var socket = io({transports:['websocket']});
       var messages = document.getElementById('messages');
@@ -27,4 +26,3 @@ html
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       }); 
-//
