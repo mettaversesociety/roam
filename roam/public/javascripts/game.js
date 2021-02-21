@@ -67,7 +67,7 @@ class Game {
         const loader = new THREE.FBXLoader();
         const game = this;
 
-        loader.load(`${this.assetsPath}fbx/people/Idle.fbx`, function (object) {
+        loader.load(`${this.assetsPath}fbx/people/Ninja Idle.fbx`, function (object) {
             object.mixer = new THREE.AnimationMixer(object);
             game.player.mixer = object.mixer;
             game.player.root = object.mixer.getRoot();

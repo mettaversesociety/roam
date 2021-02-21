@@ -32,7 +32,7 @@
   <ItemGroup>
     <Content Include="app.js" />
     <None Include="Properties\PublishProfiles\roam-mvp - Web Deploy.pubxml" />
-    <Content Include="public\assets\fbx\people\Idle.fbx" />
+    <Content Include="public\assets\fbx\people\Ninja Idle.fbx" />
     <Content Include="public\favicon.ico" />
     <Content Include="public\javascripts\Detector.js" />
     <Content Include="public\javascripts\FBXLoader.js" />
