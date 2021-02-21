@@ -1,7 +1,10 @@
 extends layout
 
 block content
-    ul(id="messages")
-    form(id="form" action="")
-        input(id="input" autocomplete="off")
-        button Send
+    div(id="message")
+        p(id="message_text")
+        button(id="message_ok") OK
+    div(id="chat")
+        form(id="msg-form" action="")
+            input(id="m" autocomplete="off")
+            button Send
