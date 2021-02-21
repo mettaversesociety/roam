@@ -36,7 +36,6 @@
     <Content Include="public\assets\fbx\anims\Running.fbx" />
     <Content Include="public\assets\fbx\anims\Walking Backwards.fbx" />
     <Content Include="public\assets\fbx\anims\Walking.fbx" />
-    <Content Include="public\assets\fbx\people\Idle2.fbx" />
     <Content Include="public\assets\fbx\people\Idle.fbx" />
     <Content Include="public\assets\fbx\ProxyTest.fbx" />
     <Content Include="public\assets\images\nx.jpg" />
@@ -53,6 +52,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="public\javascripts\inflate.min.js" />
+    <Content Include="public\javascripts\DRACOLoader.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="public\javascripts\OrbitControls.js" />
     <Content Include="public\javascripts\three.min.js" />
     <Content Include="public\javascripts\toon3d.js" />
