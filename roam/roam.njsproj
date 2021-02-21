@@ -37,6 +37,7 @@
     <Content Include="public\assets\fbx\anims\Walking Backwards.fbx" />
     <Content Include="public\assets\fbx\anims\Walking.fbx" />
     <Content Include="public\assets\fbx\people\Idle.fbx" />
+    <Content Include="public\assets\fbx\ProxyTest.fbx" />
     <Content Include="public\favicon.ico" />
     <Content Include="public\javascripts\Detector.js" />
     <Content Include="public\javascripts\FBXLoader.js" />

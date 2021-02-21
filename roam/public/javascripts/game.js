@@ -35,7 +35,7 @@ class Game {
 
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xa0a0a0);
-        this.scene.fog = new THREE.Fog(0xa0a0a0, 700, 4000); // fog gradient starts at 200 and is fully set at 1000
+        this.scene.fog = new THREE.Fog(0xa0a0a0, 1000, 5000); // fog gradient starts at 200 and is fully set at 1000
 
         let light = new THREE.HemisphereLight(0xffffff, 0x444444); // sky and ground colors
         light.position.set(0, 200, 0);
@@ -51,8 +51,8 @@ class Game {
         light.shadow.camera.left = -shadowSize;
         light.shadow.camera.right = shadowSize;
         // </range of shadow>
-        this.sun = light;
         this.scene.add(light);
+        this.sun = light;
 
         // ground
         var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false }));
@@ -68,6 +68,8 @@ class Game {
         // model
         const loader = new THREE.FBXLoader();
         const game = this;
+
+        this.loadEnvironment(loader);
 
         loader.load(`${this.assetsPath}fbx/people/Idle.fbx`, function (object) {
 
@@ -101,6 +103,29 @@ class Game {
         window.addEventListener('resize', function () { game.onWindowResize(); }, false);
     }
 
+    loadEnvironment(loader) {
+        const game = this;
+        loader.load(`${this.assetsPath}fbx/ProxyTest.fbx`, function (object) {
+            game.environment = object;
+            game.colliders = [];
+            game.scene.add(object);
+
+            object.traverse(function (child) {
+                if (child.isMesh) {
+                    if (child.name.startsWith("proxy")) {
+                        game.colliders.push(child);
+                        child.material.visible = false;
+                    } else {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                }
+            });
+
+            game.animate();
+        })
+    }
+
     loadNextAnim(loader) {
         let anim = this.anims.pop();
         const game = this;
@@ -110,6 +135,7 @@ class Game {
                 game.loadNextAnim(loader);
             } else {
                 game.createCameras();
+                //game.createColliders();
                 game.joystick = new JoyStick({
                     onMove: game.playerControl,
                     game: game
@@ -121,13 +147,112 @@ class Game {
         });
     }
 
+    //createColliders() {
+    //    const geometry = new THREE.BoxGeometry(500, 400, 500);
+    //    const material = new THREE.MeshBasicMaterial({ color: 0x222222, wireframe: true });
+
+    //    this.colliders = [];
+
+    //    for (let x = -5000; x < 5000; x += 1000) {
+    //        for (let z = -5000; z < 5000; z += 1000) {
+    //            if (x == 0 && z == 0) continue;
+    //            const box = new THREE.Mesh(geometry, material);
+    //            box.position.set(x, 250, z);
+    //            this.scene.add(box);
+    //            this.colliders.push(box);
+    //        }
+    //    }
+
+    //    const geometry2 = new THREE.BoxGeometry(1000, 40, 1000);
+    //    const stage = new THREE.Mesh(geometry2, material);
+    //    stage.position.set(0, 20, 0);
+    //    this.colliders.push(stage);
+    //    this.scene.add(stage);
+    //}
+
     movePlayer(dt) {
-        if (this.player.move.forward > 0) {
-            const speed = (this.player.action == 'Running') ? 400 : 150;
-            this.player.object.translateZ(dt * speed);
-        } else {
-            this.player.object.translateZ(-dt * 30);
+        const pos = this.player.object.position.clone();
+        pos.y += 60;
+        let dir = new THREE.Vector3();
+        this.player.object.getWorldDirection(dir);
+        if (this.player.move.forward < 0) dir.negate();
+        let raycaster = new THREE.Raycaster(pos, dir);
+        let blocked = false;
+        const colliders = this.colliders;
+
+        if (colliders !== undefined) {
+            const intersect = raycaster.intersectObjects(colliders);
+            if (intersect.length > 0) {
+                if (intersect[0].distance < 50) blocked = true;
+            }
         }
+
+        if (!blocked) {
+            if (this.player.move.forward > 0) {
+                const speed = (this.player.action == 'Running') ? 400 : 150;
+                this.player.object.translateZ(dt * speed);
+            } else {
+                this.player.object.translateZ(-dt * 30);
+            }
+        }
+
+        if (colliders !== undefined) {
+            // cast left
+            dir.set(-1, 0, 0);
+            dir.applyMatrix4(this.player.object.matrix);
+            dir.normalize();
+            raycaster = new THREE.Raycaster(pos, dir);
+
+            let intersect = raycaster.intersectObjects(colliders);
+            if (intersect.length > 0) {
+                if (intersect[0].distance < 50) this.player.object.translateX(100 - intersect[0].distance);
+            }
+
+            // cast right
+            dir.set(1, 0, 0);
+            dir.applyMatrix4(this.player.object.matrix);
+            dir.normalize();
+            raycaster = new THREE.Raycaster(pos, dir);
+
+            intersect = raycaster.intersectObjects(colliders);
+            if (intersect.length > 0) {
+                if (intersect[0].distance < 50) this.player.object.translateX(intersect[0].distance - 100);
+            }
+
+            // cast down
+            dir.set(0, -1, 0);
+            pos.y += 200;
+            raycaster = new THREE.Raycaster(pos, dir);
+            const gravity = 30;
+
+            intersect = raycaster.intersectObjects(colliders);
+            if (intersect.length > 0) {
+                const targetY = pos.y - intersect[0].distance;
+                if (targetY > this.player.object.position.y) {
+                    // Going up
+                    this.player.object.position.y = 0.8 * this.player.object.position.y + 0.2 * targetY;
+                    this.player.velocityY = 0;
+                } else if (targetY < this.player.object.position.y) {
+                    // Falling
+                    if (this.player.velocityY == undefined) this.player.velocityY = 0;
+                    this.player.velocityY += dt * gravity;
+                    this.player.object.position.y -= this.player.velocityY;
+                    if (this.player.object.position.y < targetY) {
+                        this.player.velocityY = 0;
+                        this.player.object.position.y = targetY;
+                    }
+                }
+            } else if (this.player.object.position.y > 0) {
+                if (this.player.velocityY == undefined) this.player.velocityY = 0;
+                this.player.velocityY += dt * gravity;
+                this.player.object.position.y -= this.player.velocityY;
+                if (this.player.object.position.y < 0) {
+                    this.player.velocityY = 0;
+                    this.player.object.position.y = 0;
+                }
+            }
+        }
+
         this.player.object.rotateY(this.player.move.turn * dt);
     }
 
@@ -145,6 +270,7 @@ class Game {
         this.player.mixer.stopAllAction();
         this.player.action = name;
         this.player.actionTime = Date.now();
+        this.player.actionName = name;
 
         action.fadeIn(0.5);
         action.play();
@@ -152,7 +278,7 @@ class Game {
 
     get action() {
         if (this.player === undefined || this.player.actionName === undefined) return "";
-        return this.player.action;
+        return this.player.actionName;
     }
 
     playerControl(forward, turn) {
@@ -233,7 +359,7 @@ class Game {
             this.sun.position.z = this.player.object.position.z + 100;
             this.sun.target = this.player.object;
         }
-        
+
         this.renderer.render(this.scene, this.camera);
 
     }
