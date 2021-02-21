@@ -521,7 +521,7 @@ class PlayerLocal extends Player {
 					game.scene.remove(players[0].object);
 				}
 			} else {
-				index = game.initialisingPlayers.indexOf(data.id);
+				let index = game.initialisingPlayers.indexOf(data.id);
 				if (index != -1) {
 					const player = game.initialisingPlayers[index];
 					player.deleted = true;
