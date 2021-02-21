@@ -67,12 +67,12 @@ class Game {
         const loader = new THREE.FBXLoader();
         const game = this;
 
-        loader.load(`${this.assetsPath}fbx/people/FireFighter.fbx`, function (object) {
+        loader.load(`${this.assetsPath}fbx/people/Idle.fbx`, function (object) {
             object.mixer = new THREE.AnimationMixer(object);
             game.player.mixer = object.mixer;
             game.player.root = object.mixer.getRoot();
 
-            object.name = "FireFighter";
+            object.name = "DefaultChar";
 
             object.traverse(function (child) {
                 if (child.isMesh) {
@@ -84,7 +84,7 @@ class Game {
 
             game.scene.add(object);
             game.player.object = object;
-            game.player.mixer.clipAction(object.animations[0].play());
+            game.player.mixer.clipAction(object.animations[0]).play();
 
             game.animate();
         });
@@ -93,7 +93,7 @@ class Game {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
-        document.body.appendChild(this.renderer.domElement);
+        this.container.appendChild(this.renderer.domElement);
 
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(0, 150, 0);
