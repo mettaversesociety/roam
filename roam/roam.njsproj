@@ -32,7 +32,16 @@
   <ItemGroup>
     <Content Include="app.js" />
     <None Include="Properties\PublishProfiles\roam-mvp - Web Deploy.pubxml" />
+    <Content Include="public\assets\fbx\people\Ninja Idle.fbx" />
     <Content Include="public\favicon.ico" />
+    <Content Include="public\javascripts\Detector.js" />
+    <Content Include="public\javascripts\FBXLoader.js" />
+    <Content Include="public\javascripts\game.js">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="public\javascripts\inflate.min.js" />
+    <Content Include="public\javascripts\OrbitControls.js" />
+    <Content Include="public\javascripts\three.min.js" />
     <Content Include="routes\index.js" />
     <Content Include="routes\users.js" />
     <Content Include="package.json" />
@@ -46,8 +55,11 @@
     <Folder Include="Properties\" />
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="public\" />
+    <Folder Include="public\assets\fbx\" />
+    <Folder Include="public\assets\fbx\people\" />
     <Folder Include="public\images\" />
     <Folder Include="public\javascripts\" />
+    <Folder Include="public\assets\" />
     <Folder Include="public\stylesheets\" />
     <Folder Include="routes\" />
     <Folder Include="views\" />
